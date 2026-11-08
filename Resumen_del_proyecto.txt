@@ -1,0 +1,61 @@
+STOCKSMART - RESUMEN DEL PROYECTO Y ACUERDOS
+
+IDEA Y PROBLEMA
+StockSmart es un prototipo sencillo para ayudar a pequeños almacenes y minimarkets a ordenar su inventario. Busca reducir errores de registros manuales, facilitar consultas de existencias y automatizar cálculos básicos de precios y descuentos.
+
+OBJETIVO
+Crear una aplicación web interactiva, fácil de presentar y usar desde un navegador. Se prioriza un alcance pequeño que el equipo pueda comprender y terminar en el plazo de dos semanas, aplicando conceptos de funciones, sumatorias, vectores y matrices.
+
+FUNCIONES INCLUIDAS
+- Agregar, editar y eliminar productos.
+- Registrar nombre, categoría, cantidad, stock mínimo, costo y precio de venta.
+- Buscar productos por nombre o categoría y filtrar los que tienen stock bajo.
+- Mostrar cantidad de productos, unidades disponibles y capital invertido en el inventario.
+- Alertar cuando la cantidad es igual o menor al stock mínimo configurado.
+- Calcular un descuento para un precio, con opción de cargar el precio desde un producto.
+- Mostrar el margen de cada producto, el valor potencial de venta de todo el stock y su ganancia potencial.
+- Exportar una copia del inventario y los cálculos a un archivo CSV.
+- Guardar los datos en el almacenamiento local del navegador.
+
+MATEMÁTICAS APLICADAS
+1. Descuento:
+   Precio final = precio original × (1 − descuento / 100)
+   Ejemplo: $2.000 con un descuento de 15% da $1.700.
+
+2. Capital valorizado al costo:
+   Capital = Σ(cantidad de cada producto × costo unitario)
+   Se puede representar con los vectores de cantidades y costos, multiplicando sus elementos correspondientes y sumando los resultados.
+
+3. Margen sobre el precio de venta:
+   Margen (%) = ((precio de venta − costo unitario) / precio de venta) × 100
+   Si el precio de venta es cero, el sistema muestra 0% para evitar una división por cero.
+
+4. Venta y ganancia potencial:
+   Venta potencial = Σ(cantidad × precio de venta)
+   Ganancia potencial = Σ(cantidad × (precio de venta − costo))
+   Son estimaciones suponiendo que se vende todo el stock al precio registrado; no descuentan otros gastos.
+
+5. Matriz de inventario:
+   Cada fila representa un producto y sus columnas contienen sus atributos (nombre, categoría, cantidad, costo, precio y stock mínimo).
+
+DECISIONES DE ALCANCE
+- No se incluye predicción de demanda ni fecha automática de reposición.
+- No se implementa optimización automática de precios, porque el planteamiento no define un criterio matemático para ella.
+- No se registran ventas ni pagos; para cambiar cantidades se edita el producto.
+- Los datos se guardan en el navegador y dispositivo utilizados. No se sincronizan entre equipos.
+- El CSV permite conservar o revisar una copia en una hoja de cálculo; no restaura automáticamente datos en la aplicación.
+- La ganancia potencial no equivale a utilidad contable y no incluye gastos, impuestos ni pérdidas.
+
+DEMOSTRACIÓN SUGERIDA
+1. Registrar más de un producto.
+2. Buscar por nombre y por categoría.
+3. Filtrar los productos con stock bajo y mostrar la alerta.
+4. Verificar el descuento de $2.000 con 15% (= $1.700).
+5. Comparar capital, venta potencial y ganancia potencial con cálculos manuales simples.
+6. Exportar el CSV y abrirlo en una hoja de cálculo.
+
+ARCHIVOS PRINCIPALES
+- index.html: interfaz de la aplicación.
+- styles.css: estilos y adaptación a pantallas pequeñas.
+- app.js: inventario, fórmulas, búsqueda, filtro, almacenamiento y exportación.
+- README.md: instrucciones y descripción técnica breve.

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f4">
+  <title>StockSmart | Inventario sencillo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="StockSmart, inicio">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span>Stock<span>Smart</span></span>
+    </a>
+    <p>Inventario claro, decisiones simples.</p>
+  </header>
+
+  <main class="page-content">
+    <section class="intro">
+      <div>
+        <p class="eyebrow">CONTROL DE INVENTARIO</p>
+        <h1>Tu negocio, en orden.</h1>
+        <p class="intro-copy">Registra productos, revisa existencias y calcula descuentos en un solo lugar.</p>
+      </div>
+      <span class="intro-icon" aria-hidden="true">▦</span>
+    </section>
+
+    <section class="summary-grid" aria-label="Resumen del inventario">
+      <article class="summary-card">
+        <span class="summary-label">Productos registrados</span>
+        <strong id="product-count">0</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Unidades en stock</span>
+        <strong id="unit-count">0</strong>
+      </article>
+      <article class="summary-card summary-card-highlight">
+        <span class="summary-label">Capital en inventario</span>
+        <strong id="inventory-value">$0</strong>
+        <span class="summary-note">Valorizado según costo unitario</span>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Venta potencial</span>
+        <strong id="potential-sales">$0</strong>
+        <span class="summary-note">Si se vende todo el stock</span>
+      </article>
+      <article class="summary-card summary-card-highlight">
+        <span class="summary-label">Ganancia potencial</span>
+        <strong id="potential-profit">$0</strong>
+        <span class="summary-note">Antes de otros gastos</span>
+      </article>
+    </section>
+
+    <section class="workspace-grid">
+      <section class="panel" aria-labelledby="product-form-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CATÁLOGO</p>
+            <h2 id="product-form-title">Agregar producto</h2>
+          </div>
+        </div>
+        <form id="product-form">
+          <input id="product-id" type="hidden">
+          <label>
+            Nombre del producto
+            <input id="product-name" name="name" type="text" maxlength="80" placeholder="Ej. Arroz" required>
+          </label>
+          <label>
+            Categoría
+            <input id="product-category" name="category" type="text" maxlength="50" placeholder="Ej. Abarrotes" required>
+          </label>
+          <div class="form-row">
+            <label>
+              Cantidad
+              <input id="product-quantity" name="quantity" type="number" min="0" step="1" value="0" required>
+            </label>
+            <label>
+              Stock mínimo
+              <input id="product-minimum" name="minimum" type="number" min="0" step="1" value="5" required>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>
+              Costo unitario
+              <input id="product-cost" name="cost" type="number" min="0" step="1" placeholder="0" required>
+            </label>
+            <label>
+              Precio de venta
+              <input id="product-price" name="price" type="number" min="0" step="1" placeholder="0" required>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="button button-primary" id="save-product" type="submit">Guardar producto</button>
+            <button class="button button-secondary hidden" id="cancel-edit" type="button">Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel discount-panel" aria-labelledby="discount-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CÁLCULO RÁPIDO</p>
+            <h2 id="discount-title">Aplicar descuento</h2>
+          </div>
+          <span class="discount-icon" aria-hidden="true">%</span>
+        </div>
+        <p class="panel-copy">Ingresa el precio original y el porcentaje de descuento para obtener el precio final.</p>
+        <div class="form-row">
+          <label>
+            Precio original
+            <input id="discount-price" type="number" min="0" step="1" placeholder="Ej. 2000">
+          </label>
+          <label>
+            Descuento (%)
+            <input id="discount-percent" type="number" min="0" max="100" step="any" placeholder="Ej. 15">
+          </label>
+        </div>
+        <div class="discount-result" aria-live="polite">
+          <span>Precio final</span>
+          <strong id="discount-result">$0</strong>
+        </div>
+        <p class="formula">Precio final = precio original × (1 − descuento / 100)</p>
+      </section>
+    </section>
+
+    <section class="panel inventory-panel" aria-labelledby="inventory-title">
+      <div class="inventory-heading">
+        <div>
+          <p class="eyebrow">EXISTENCIAS</p>
+          <h2 id="inventory-title">Inventario de productos</h2>
+        </div>
+        <button class="button button-secondary export-button" id="export-csv" type="button" disabled>
+          Exportar CSV
+        </button>
+      </div>
+      <div class="inventory-tools">
+        <label class="search-field">
+          Buscar producto
+          <input id="product-search" type="search" placeholder="Nombre o categoría">
+        </label>
+        <label class="filter-field">
+          Mostrar
+          <select id="stock-filter">
+            <option value="all">Todos los productos</option>
+            <option value="low">Solo stock bajo</option>
+          </select>
+        </label>
+        <span class="table-count" id="table-count">0 productos</span>
+      </div>
+      <div class="notice hidden" id="low-stock-notice" role="status"></div>
+      <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Cantidad</th>
+              <th scope="col">Costo</th>
+              <th scope="col">Precio venta</th>
+              <th scope="col">Stock mínimo</th>
+              <th scope="col">Margen</th>
+              <th scope="col">Venta potencial</th>
+              <th scope="col">Ganancia potencial</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="visually-hidden">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state">
+          <span aria-hidden="true">▤</span>
+          <strong>Aún no hay productos</strong>
+          <p>Agrega tu primer producto para comenzar a organizar el inventario.</p>
+        </div>
+        <div class="empty-state hidden" id="no-results">
+          <span aria-hidden="true">⌕</span>
+          <strong>No se encontraron productos</strong>
+          <p>Prueba con otro nombre, categoría o filtro.</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="privacy-note">Tus datos se guardan en este navegador y en este dispositivo.</p>
+  </main>
+
+  <footer class="site-footer">StockSmart · Una herramienta sencilla para pequeños negocios</footer>
+</body>
+</html>
