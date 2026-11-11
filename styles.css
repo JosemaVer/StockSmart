@@ -1,15 +1,17 @@
 :root {
   color-scheme: light;
-  --ink: #1c3028;
-  --muted: #748078;
-  --green: #18734e;
-  --green-dark: #125b3e;
-  --green-pale: #eaf4ed;
-  --line: #e7ece8;
+  --ink: #183229;
+  --muted: #68756e;
+  --green: #167447;
+  --green-dark: #105b37;
+  --green-pale: #e4f2e7;
+  --line: #dce4de;
   --paper: #ffffff;
-  --canvas: #f5f7f4;
-  --amber: #9a5d0b;
+  --canvas: #eef1ed;
+  --amber: #8a5708;
   --amber-pale: #fff3dc;
+  --red: #a63c34;
+  --red-pale: #fdebe8;
   font-family: "Segoe UI", Arial, sans-serif;
   color: var(--ink);
   background: var(--canvas);
@@ -22,9 +24,7 @@
 body {
   min-width: 320px;
   margin: 0;
-  background:
-    radial-gradient(ellipse at 87% 2%, rgba(216, 236, 218, 0.6), transparent 27rem),
-    var(--canvas);
+  background: var(--canvas);
 }
 
 button,
@@ -39,21 +39,22 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(28, 48, 40, 0.07);
+  border-bottom: 3px solid #a7cf62;
+  background: #173d31;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: var(--ink);
+  color: white;
   font: 800 20px "Segoe UI", Arial, sans-serif;
   letter-spacing: -0.8px;
   text-decoration: none;
 }
 
 .brand > span:last-child > span {
-  color: var(--green);
+  color: #b6d976;
 }
 
 .brand-mark {
@@ -62,19 +63,19 @@ select {
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: var(--green);
-  color: white;
+  background: #b6d976;
+  color: #173d31;
   font: 800 18px "Segoe UI", Arial, sans-serif;
 }
 
 .site-header > p,
 .site-footer {
-  color: var(--muted);
+  color: #d2e0d6;
   font-size: 13px;
 }
 
 .page-content {
-  width: min(1200px, 90%);
+  width: min(1440px, 92%);
   margin: 0 auto;
   padding: 42px 0 34px;
 }
@@ -142,9 +143,9 @@ h1 {
 .summary-card,
 .panel {
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 9px;
   background: var(--paper);
-  box-shadow: 0 5px 18px rgba(27, 55, 39, 0.025);
+  box-shadow: 0 3px 10px rgba(27, 55, 39, 0.04);
 }
 
 .summary-card {
@@ -167,8 +168,8 @@ h1 {
 }
 
 .summary-card-highlight {
-  border-color: #d7e9dc;
-  background: #eff7f0;
+  border-color: #c9ddcd;
+  background: #e8f3e9;
 }
 
 .summary-card-highlight strong {
@@ -218,6 +219,13 @@ label {
   color: #43544a;
   font-size: 11px;
   font-weight: 600;
+}
+
+.field-hint {
+  margin-top: -2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
 }
 
 input {
@@ -399,6 +407,13 @@ input:focus {
   line-height: 1.5;
 }
 
+.notice-loss {
+  border-color: #efc4bd;
+  background: var(--red-pale);
+  color: var(--red);
+  font-weight: 700;
+}
+
 .status-message {
   margin: 0 0 10px;
   color: var(--green-dark);
@@ -415,32 +430,48 @@ input:focus {
 
 .table-wrapper {
   overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 7px;
 }
 
 table {
   width: 100%;
+  min-width: 1120px;
   border-collapse: collapse;
   text-align: left;
   white-space: nowrap;
 }
 
 th {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--line);
-  color: #89938b;
+  padding: 11px 10px;
+  border-bottom: 2px solid #cad6cd;
+  background: #f0f4f0;
+  color: #596960;
   font-size: 10px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
 }
 
 td {
-  padding: 12px;
+  padding: 11px 10px;
   border-bottom: 1px solid #f0f3f0;
   color: #536159;
   font-size: 11px;
 }
 
+tbody tr:nth-child(even) {
+  background: #f8faf8;
+}
+
 tbody tr:last-child td {
   border-bottom: 0;
+}
+
+.total-cost {
+  background: #fff8e9;
+  color: #594514;
+  font-weight: 700;
 }
 
 .product-name {
@@ -450,9 +481,10 @@ tbody tr:last-child td {
 
 .stock-status {
   display: inline-block;
+  margin: 1px 0;
   padding: 5px 8px;
   border-radius: 20px;
-  background: #eaf4ed;
+  background: #e4f2e7;
   color: #24744f;
   font-size: 10px;
   font-weight: 600;
@@ -461,6 +493,12 @@ tbody tr:last-child td {
 .stock-status-low {
   background: var(--amber-pale);
   color: var(--amber);
+}
+
+.stock-status-out,
+.stock-status-loss {
+  background: var(--red-pale);
+  color: var(--red);
 }
 
 .row-actions {
@@ -524,14 +562,16 @@ tbody tr:last-child td {
 
 .site-footer {
   padding: 17px 5%;
-  border-top: 1px solid rgba(28, 48, 40, 0.07);
+  border-top: 1px solid #dce4de;
   text-align: center;
   font-size: 11px;
+  color: var(--muted);
 }
 
 .hidden,
 .visually-hidden {
   position: absolute;
+  left: 0;
   width: 1px;
   height: 1px;
   overflow: hidden;

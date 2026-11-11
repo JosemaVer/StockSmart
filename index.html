@@ -65,7 +65,8 @@
           <input id="product-id" type="hidden">
           <label>
             Nombre del producto
-            <input id="product-name" name="name" type="text" maxlength="80" placeholder="Ej. Arroz" required>
+            <input id="product-name" name="name" type="text" maxlength="80" placeholder="Ej. Arroz 1 kg · Línea 1" required>
+            <span class="field-hint">Usa un nombre único para distinguir cada presentación.</span>
           </label>
           <label>
             Categoría
@@ -144,12 +145,15 @@
           Mostrar
           <select id="stock-filter">
             <option value="all">Todos los productos</option>
-            <option value="low">Solo stock bajo</option>
+            <option value="out">Sin stock</option>
+            <option value="low">Stock bajo</option>
+            <option value="available">Disponible</option>
           </select>
         </label>
         <span class="table-count" id="table-count">0 productos</span>
       </div>
       <div class="notice hidden" id="low-stock-notice" role="status"></div>
+      <div class="notice notice-loss hidden" id="loss-notice" role="alert"></div>
       <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
       <div class="table-wrapper">
         <table>
@@ -158,7 +162,8 @@
               <th scope="col">Producto</th>
               <th scope="col">Categoría</th>
               <th scope="col">Cantidad</th>
-              <th scope="col">Costo</th>
+              <th scope="col">Costo unitario</th>
+              <th scope="col">Costo total</th>
               <th scope="col">Precio venta</th>
               <th scope="col">Stock mínimo</th>
               <th scope="col">Margen</th>

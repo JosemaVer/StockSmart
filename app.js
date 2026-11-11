@@ -19,6 +19,7 @@ const discountResult = document.querySelector("#discount-result");
 const productSearch = document.querySelector("#product-search");
 const stockFilter = document.querySelector("#stock-filter");
 const exportButton = document.querySelector("#export-csv");
+const lossNotice = document.querySelector("#loss-notice");
 
 let products = loadProducts();
 
@@ -72,6 +73,11 @@ function calculatePotentialProfit(product) {
   return product.quantity * (product.price - product.cost);
 }
 
+function getStockStatus(product) {
+  if (product.quantity === 0) return "out";
+  return product.quantity <= product.minimum ? "low" : "available";
+}
+
 function createCell(text, className = "") {
   const cell = document.createElement("td");
   cell.textContent = text;
@@ -97,19 +103,20 @@ function renderInventory() {
     const matchesSearch =
       normalizeText(product.name).includes(searchTerm) ||
       normalizeText(product.category).includes(searchTerm);
-    const matchesFilter = filter !== "low" || product.quantity <= product.minimum;
+    const matchesFilter = filter === "all" || getStockStatus(product) === filter;
     return matchesSearch && matchesFilter;
   });
 
   for (const product of visibleProducts) {
     const row = document.createElement("tr");
-    const isLowStock = product.quantity <= product.minimum;
+    const stockStatus = getStockStatus(product);
 
     row.append(
       createCell(product.name, "product-name"),
       createCell(product.category),
       createCell(String(product.quantity)),
       createCell(formatCurrency(product.cost)),
+      createCell(formatCurrency(product.quantity * product.cost), "total-cost"),
       createCell(formatCurrency(product.price)),
       createCell(String(product.minimum)),
       createCell(`${calculateMargin(product).toFixed(1)}%`),
@@ -118,10 +125,21 @@ function renderInventory() {
     );
 
     const statusCell = document.createElement("td");
-    const status = document.createElement("span");
-    status.className = `stock-status${isLowStock ? " stock-status-low" : ""}`;
-    status.textContent = isLowStock ? "Stock bajo" : "Disponible";
-    statusCell.append(status);
+    const stockBadge = document.createElement("span");
+    const stockLabels = {
+      out: "Sin stock",
+      low: "Stock bajo",
+      available: "Disponible",
+    };
+    stockBadge.className = `stock-status stock-status-${stockStatus}`;
+    stockBadge.textContent = stockLabels[stockStatus];
+    statusCell.append(stockBadge);
+    if (product.price < product.cost) {
+      const lossBadge = document.createElement("span");
+      lossBadge.className = "stock-status stock-status-loss";
+      lossBadge.textContent = "Vende con pérdida";
+      statusCell.append(document.createElement("br"), lossBadge);
+    }
     row.append(statusCell);
 
     const actions = document.createElement("td");
@@ -148,18 +166,8 @@ function renderInventory() {
 }
 
 function renderSummary() {
-  const unitVector = products.map((product) => product.quantity);
-  const costVector = products.map((product) => product.cost);
-  const inventoryMatrix = products.map((product) => [
-    product.name,
-    product.category,
-    product.quantity,
-    product.cost,
-    product.price,
-    product.minimum,
-  ]);
-  const inventoryValue = unitVector.reduce(
-    (total, quantity, index) => total + quantity * costVector[index],
+  const inventoryValue = products.reduce(
+    (total, product) => total + product.quantity * product.cost,
     0,
   );
   const potentialSales = products.reduce(
@@ -170,10 +178,10 @@ function renderSummary() {
     (total, product) => total + calculatePotentialProfit(product),
     0,
   );
-  const totalUnits = unitVector.reduce((total, quantity) => total + quantity, 0);
-  const lowStockProducts = inventoryMatrix.filter(
-    (productRow) => productRow[2] <= productRow[5],
-  );
+  const totalUnits = products.reduce((total, product) => total + product.quantity, 0);
+  const outOfStockProducts = products.filter((product) => getStockStatus(product) === "out");
+  const lowStockProducts = products.filter((product) => getStockStatus(product) === "low");
+  const lossProducts = products.filter((product) => product.price < product.cost);
 
   document.querySelector("#product-count").textContent = String(products.length);
   document.querySelector("#unit-count").textContent = String(totalUnits);
@@ -181,11 +189,31 @@ function renderSummary() {
   document.querySelector("#potential-sales").textContent = formatCurrency(potentialSales);
   document.querySelector("#potential-profit").textContent = formatCurrency(potentialProfit);
 
-  lowStockNotice.classList.toggle("hidden", lowStockProducts.length === 0);
+  const stockAlerts = [];
+  if (outOfStockProducts.length > 0) {
+    stockAlerts.push(
+      `Sin stock: ${outOfStockProducts.map((product) => product.name).join(", ")}.`,
+    );
+  }
   if (lowStockProducts.length > 0) {
-    const names = lowStockProducts.map((productRow) => productRow[0]).join(", ");
-    lowStockNotice.textContent =
-      `Revisa el stock de ${names}. La cantidad disponible está en el mínimo definido o por debajo.`;
+    stockAlerts.push(
+      `Stock bajo: ${lowStockProducts.map((product) => product.name).join(", ")}.`,
+    );
+  }
+  lowStockNotice.classList.toggle("hidden", stockAlerts.length === 0);
+  lowStockNotice.textContent = stockAlerts.join(" ");
+
+  lossNotice.classList.toggle("hidden", lossProducts.length === 0);
+  if (lossProducts.length > 0) {
+    const details = lossProducts
+      .map(
+        (product) =>
+          `${product.name} (${formatCurrency(product.cost - product.price)} de pérdida por unidad)`,
+      )
+      .join(", ");
+    lossNotice.textContent =
+      `Atención: el precio de venta está por debajo del costo en ${lossProducts.length} ` +
+      `${lossProducts.length === 1 ? "producto" : "productos"}. ${details}.`;
   }
 }
 
@@ -194,6 +222,10 @@ function normalizeText(text) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLocaleLowerCase("es");
+}
+
+function normalizeProductName(name) {
+  return normalizeText(name.trim()).replace(/\s+/g, " ");
 }
 
 function escapeCsvValue(value) {
@@ -213,11 +245,14 @@ function exportCsv() {
     "Categoría",
     "Cantidad",
     "Costo unitario",
+    "Costo total",
     "Precio de venta",
     "Stock mínimo",
     "Margen (%)",
     "Venta potencial",
     "Ganancia potencial",
+    "Estado de stock",
+    "Precio bajo costo",
   ];
   const rows = products.map((product) => {
     return [
@@ -225,11 +260,16 @@ function exportCsv() {
       product.category,
       product.quantity,
       product.cost,
+      product.quantity * product.cost,
       product.price,
       product.minimum,
       calculateMargin(product).toFixed(1),
       calculatePotentialSales(product),
       calculatePotentialProfit(product),
+      { out: "Sin stock", low: "Stock bajo", available: "Disponible" }[
+        getStockStatus(product)
+      ],
+      product.price < product.cost ? "Sí" : "No",
     ];
   });
   const csvContent = [headers, ...rows]
@@ -345,6 +385,20 @@ form.addEventListener("submit", (event) => {
 
   if (!productData.name || !productData.category) {
     showMessage("Completa el nombre y la categoría del producto.", true);
+    return;
+  }
+
+  const duplicate = products.find(
+    (product) =>
+      product.id !== productId &&
+      normalizeProductName(product.name) === normalizeProductName(productData.name),
+  );
+  if (duplicate) {
+    showMessage(
+      `Ya existe "${duplicate.name}". Usa un nombre distinto para identificar la presentación o marca.`,
+      true,
+    );
+    document.querySelector("#product-name").focus();
     return;
   }
 
